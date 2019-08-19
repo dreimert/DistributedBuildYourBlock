@@ -79,9 +79,15 @@ Vous allez implémentez une nouvelle commande `keys` dans le serveur de la BDD. 
 
 #### Implémentez la nouvelle commande `keys`.
 
-## Suite
+## Conclusion
 
-Vous avez survécu ? Cool ! Passons à l'étape suivante.
+Vous avez survécu ? Cool !
+
+Quel est le rapport entre cette base de données et la blockchain ? La blockchain est une base de données avec les propriétés décrites. On ne peut pas mettre à jours les données ni en supprimer, on ne peut qu'en ajouter et lire le contenu.
+
+Mais la blockchain est une base de données distribuées, se qui n'est pas le cas de la notre qui raisonne en terme de client / serveur. On va essayer de corriger ça !
+
+## Suite
 
 Aller à l'étape 2 : `git checkout etape-2`.
 
