@@ -1,0 +1,16 @@
+{
+  "name": "dbyb",
+  "version": "1.0.0",
+  "description": "\"Distributed Build Your Block\"",
+  "main": "index.js",
+  "scripts": {
+    "db": "node db.js",
+    "db-client": "node db-client.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Damien Reimert",
+  "license": "CC-BY-NC-SA-4.0",
+  "dependencies": {
+    "socket.io": "^2.2.0"
+  }
+}
