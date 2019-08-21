@@ -1,97 +1,115 @@
 # Distributed Build Your Block
 
-Le but de ce tutoriel est de coder une blockchain depuis zéro pour en comprendre les mécanismes. Cette blockchain sera très loin d'une blockchain de production mais permettra d'illustrer les différentes mécaniques la constituant. Les notions et les problématiques seront introduites au fur et à mesure de la progression. Certaines seront *un peu* simplifiées.
-
-Le code se fait en Javascript pour permettre au plus grand nombre de réaliser ce tutoriel et parce que c'est le langage de programmation que j'utilise quotidiennement :D. L'environnement utilisé pour l'écriture de ce sujet est Node.js (https://nodejs.org/fr/) en version 12 avec npm pour gérer les dépendances mais il doit fonctionner à partir de la version 10.
-
-Ce tutoriel est la seconde itération, vous pouvez trouver la première là : https://github.com/dreimert/BuildYourBlock.
-
-## Prérequis
-
-Je pars du principe que vous savez coder en Javascript et utiliser git et github. Si ce n'est pas le cas, je vous invite pour le prochain TD à lire :
-
-* Javascript :
-  * https://eloquentjavascript.net/ (troisième édition en anglais)
-  * https://fr.eloquentjavascript.net/ (première edition en français, anglais, allemand et polonais)
-* Programmation événementielle en Javascript:
-  * https://eloquentjavascript.net/11_async.html (Chapitre 11 de Eloquent JavaScript troisième édition)
-  * http://www.fil.univ-lille1.fr/~routier/enseignement/licence/tw1/spoc/chap10-evenements-partie1.html (Vidéo / cours de Jean-Christophe Routier)
-* Git : http://rogerdudler.github.io/git-guide/index.fr.html
-
-## Installation de node
-
-Télécharger les binaires et les décompresser :
-
-    wget https://nodejs.org/dist/v12.8.1/node-v12.8.1-linux-x64.tar.xz
-    tar -xJvf node-v12.8.1-linux-x64.tar.xz
-
-Mettre à jour votre PATH :
-
-    echo "export PATH=$PATH:$(pwd)/node-v12.8.1-linux-x64/bin/" >> ~/.bashrc
-
-Recharger vos variables d'environnement :
-
-    . ~/.bashrc
-
-Vérifier que node s'exécute bien :
-
-    node --version
-
-## Cloner ce dépôt
-
-```Bash
-git clone https://github.com/dreimert/DistributedBuildYourBlock.git
-cd DistributedBuildYourBlock
-```
-
 ## Objectif
 
 Les buts de cette étape sont :
 
-* Mettre en place l'environnement du tutoriel.
-* Comprendre les bases de socket.io.
-* Comprendre le fonctionnement d'une base de données minimaliste.
+* Transformer notre base de données client / serveur en une base distribuées.
+* Comprendre les problèmes liés aux systèmes distribués.
 
-## Une base de données minimaliste
+## Confiance et défaillance
 
-J'ai réalisé pour vous un serveur de base de données minimaliste. Pour l'exécuter, taper la commande : `node db.js`.
+Dans l'approche par client / serveur, vous devez avoir confiance dans le serveur :
 
-La base de données n'accepte que deux commandes : `get` et `set` :
+* Il ne va pas altérer les données : les perdre ou les corrompre.
+* Il va être disponible pour vous répondre : accepter de vous répondre, être actif et ne pas subir une panne.
 
-* get : permet de récupérer la valeur d'un champs. Si le champs n'existe pas, retourne `null`.
-* set : permet d'associer une valeur à un champs. Si le champs existe déjà, il n'est pas modifié et la commande retourne `false`. Sinon, place la valeur et retourne `true`.
+Vous devez avoir confiance dans le faite que l'individu ou l'entité qui opère le serveur respecte ces critères. Mais face à des enjeux économiques ou politique important, il se peut qu'on ne puisse pas faire confiance à une seule entité.
 
-Pour illustrer le fonctionnement, vous pouvez lancer plusieurs fois le client : `node db-client.js`.
+Pour résister aux pannes ou à une forte demande vous pouvez aussi avoir envie de mettre plusieurs serveurs, chacun pouvant absorber une partie de la charge.
 
-#### Est-ce que le serveur se comporte comme la spécification ?
+La solution utilisée par la blockchain est la distribution. Il n'y a pas de serveur central, tout le monde peut se rajouter au réseau et assurer le rôle de serveur. C'est une base de données distribués. Distribuer revient à avoir plusieurs serveurs qui se synchronisent entre eux.
 
-Vous pouvez voir le code du serveur et du client dans les fichiers `db.js` et `db-client.js`. Corrigez le code pour que le serveur soit conforme à la spécification.
+#### Essayer de lancer plusieurs fois le serveur. Que ce passe-t'il ? Pourquoi ?
 
-## Socket.io
+## Configuration
 
-Pour gagner du temps, j'utilise *socket.io* qui me permet d'établir une connexion entre le serveur et le client. Vous pouvez trouver la documentation là : https://socket.io/.
+Mettre plusieurs serveurs sur une même machine n'est pas une idée de génie. En production, l'utilité est assez limité mais en test ou en développement, c'est fort utile à moins de disposer de plusieurs machines.
 
-Nous n'utiliseront pas beaucoup plus de fonctionnalités que celles utilisés dans l'exemple de la base de données. Il faut savoir envoyer et recevoir un message.
+Il faut pouvoir lancer le serveur plusieurs fois avec des configuration différentes. Essayer de lancer les commandes suivantes : `node configuration.js configuration1.json`, `node configuration.js configuration2.json` et `node configuration.js`.
 
-## Keys
+#### En vous inspirant de `configuration.js` modifiez `db.js` et `db-client.js` pour qu'il prennent un fichier de configuration et que fichier détermine le port utilité.
 
-Vous allez implémentez une nouvelle commande `keys` dans le serveur de la BDD. Cette commande retourne un tableau de toutes les clés de la base de données. Si la base de données est vide, la commande retourne un tableau vide. Pour obtenir la liste des clés d'un object : `Object.keys(monObject)`.
+Vous êtes maintenant en mesure de lancer deux serveurs en parallèle mais ils ne se voient pas et ne se synchronisent pas.
 
-#### Implémentez la nouvelle commande `keys`.
+## Appariement et synchronisation
+
+Il faut maintenant faire en sorte que nos serveurs se voient et se parlent. Pour ça, il faut savoir comment les contacter.
+
+#### Ajoutez dans les fichiers de configuration une liste des autres pairs avec le port de connexion.
+
+#### Au lancement du serveur, connectez-vous aux autres pairs.
+
+#### Modifiez la méthode `set` pour qu'elle mette à jour les autres pairs.
+
+Vous avez réussi ? Réfléchissez maintenant à tous les problèmes qui peuvent arriver. Est-ce que cette solution est viable ? Comment ajouter un pair ? Que ce passe-t'il si un pair plante ? Si deux pairs reçoivent en même temps deux valeurs différentes pour la même clé ?
+
+Nous verrons comment résoudre ces difficultés plus tard.
+
+## CLI
+
+Pour continuer, on va avoir besoin de faire des tests et d'envoyer des commandes `set` et `get`. En utilisant ce que vous venez d'apprendre, transformer le client Command Line Interface (CLI) de la forme :
+
+    node cli.js <configFile> <command> <paramètres>...
+
+Par exemple, pour mettre une valeur :
+
+    node cli.js <configFile> set MonChamp 42
+
+Et pour la récupérer :
+
+    node cli.js <configFile> get MonChamp
+
+## Jouer à trois ou plus
+
+Dans bitcoin et dans un système distribué plus généralement, on peut ajouter un noeud à tout moment.
+
+#### Ecrivez un troisième fichier de configuration et lancer le serveur sans modifier les deux autres. Que se passe-t'il ?
+
+#### Modifier le serveur pour qu'au lancement, il fasse une requête `keys` à un des autres serveur et récupère toutes les valeurs qu'il n'a pas.
+
+#### Que se passe-t'il maintenant si vous ajoutez un champs au serveur 1 ? Quel est la réponse des serveur 2 et 3 à votre `get` ?
+
+Quand un nouveau serveur s'ajoute au système, il doit recevoir les mise à jours. Plusieurs solutions :
+
+* Le serveur demande régulièrement la liste de `keys` mais ça peut rapidement devenir long et le taux de rafraichissement est dépendent de la fréquence des demandes.
+* Soit il demande à être informer des mises à jours, par exemple avec une commande `addListener` et l'adresse de contact.
+* Soit les serveurs informent tout leurs contacts dès qu'il y a un événement.
+
+J'aime bien la dernière, elle est simple. Socket.io dispose de la possibilité de faire un broadcast à toutes les sockets connectés : https://socket.io/docs/#Broadcasting-messages
+
+#### Éditez la commande `set` pour qu'elle broadcast l'événement à toutes les personnes connectées.
+
+#### Est-ce qu'il se passe quelque-chose de bizarre dans vos tests ?
+
+Selon l'implémentation, il peut se former :
+
+* soit une boucle infinie où le message `set` est propagé indéfiniment entre les machines
+* soit une machine est informé plusieurs fois de `set` et affiche une erreur mais se qui met fin à la propagation.
+
+Le premier cas est très gênant, le second peut être réglé par un algorithme de consensus.
+
+#### Faite quelques tests et vérifiez que ça fonctionne quelque-soit le serveur qui reçoit les `set` et les `get`.
 
 ## Conclusion
 
-Vous avez survécu ? Cool !
-
-Quel est le rapport entre cette base de données et la blockchain ? La blockchain est une base de données avec les propriétés décrites. On ne peut pas mettre à jours les données ni en supprimer, on ne peut qu'en ajouter et lire le contenu.
-
-Mais la blockchain est une base de données distribuées, se qui n'est pas le cas de la notre qui raisonne en terme de client / serveur. On va essayer de corriger ça !
+Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste.
 
 ## Suite
 
-Aller à l'étape 2 : `git checkout etape-2`.
+Aller à l'étape 3 : `git checkout etape-3`.
 
 Pour continuer à lire le sujet :
 
 * soit vous lisez le fichier `README.md` sur votre machine.
-* soit sur GitHub, au-dessus de la liste des fichiers, vous pouvez cliquer sur `Branch: master` et sélectionner `etape-2`.
+* soit sur GitHub, au-dessus de la liste des fichiers, vous pouvez cliquer sur `Branch: master` et sélectionner `etape-3`.
+
+## Pour aller plus loin
+
+Pour continuer cette étape, vous pouvez identifier les serveurs par leur ip/port et discuter avec vos camarades pour étendre le système entre plusieurs machines.
+
+Vous pouvez mettre en place des backups sur disque de la base de données.
+
+Implémenter une commande `addPeer` qui permet via le CLI d'ajouter l'identifiant d'un serveur à un autre.
+
+Implémentez une commande `getPeers` qui permet d'avoir la liste des pairs d'un serveur et pouvoir se connecter à eux.
