@@ -14,11 +14,11 @@ Dans l'approche par client / serveur, vous devez avoir confiance dans le serveur
 * Il ne va pas altérer les données : les perdre ou les corrompre.
 * Il va être disponible pour vous répondre : accepter de vous répondre, être actif et ne pas subir une panne.
 
-Vous devez avoir confiance dans le faite que l'individu ou l'entité qui opère le serveur respecte ces critères. Mais face à des enjeux économiques ou politique important, il se peut qu'on ne puisse pas faire confiance à une seule entité.
+Vous devez avoir confiance dans le faite que l'individu ou l'entité qui opère le serveur respecte ces critères. Mais face à des enjeux économiques ou politiques importants, il se peut qu'on ne puisse pas faire confiance à une seule entité.
 
 Pour résister aux pannes ou à une forte demande vous pouvez aussi avoir envie de mettre plusieurs serveurs, chacun pouvant absorber une partie de la charge.
 
-La solution utilisée par la blockchain est la distribution. Il n'y a pas de serveur central, tout le monde peut se rajouter au réseau et assurer le rôle de serveur. C'est une base de données distribués. Distribuer revient à avoir plusieurs serveurs qui se synchronisent entre eux.
+La solution utilisée par la blockchain est la distribution. Il n'y a pas de serveur central, tout le monde peut se rajouter au réseau et assurer le rôle de serveur. C'est une base de données distribuées. Distribuer revient à avoir plusieurs serveurs qui se synchronisent entre eux.
 
 #### Essayer de lancer plusieurs fois le serveur. Que ce passe-t'il ? Pourquoi ?
 
@@ -26,15 +26,15 @@ La solution utilisée par la blockchain est la distribution. Il n'y a pas de ser
 
 Mettre plusieurs serveurs sur une même machine n'est pas une idée de génie. En production, l'utilité est assez limité mais en test ou en développement, c'est fort utile à moins de disposer de plusieurs machines.
 
-Il faut pouvoir lancer le serveur plusieurs fois avec des configuration différentes. Essayer de lancer les commandes suivantes : `node configuration.js configuration1.json`, `node configuration.js configuration2.json` et `node configuration.js`.
+Il faut pouvoir lancer le serveur plusieurs fois avec des configurations différentes. Essayez de lancer les commandes suivantes : `node configuration.js configuration1.json`, `node configuration.js configuration2.json` et `node configuration.js`.
 
-#### En vous inspirant de `configuration.js` modifiez `db.js` et `db-client.js` pour qu'il prennent un fichier de configuration et que fichier détermine le port utilité.
+#### En vous inspirant de `configuration.js` modifiez `db.js` et `db-client.js` pour qu'ils prennent un fichier de configuration et que le fichier détermine le port utilité.
 
 Vous êtes maintenant en mesure de lancer deux serveurs en parallèle mais ils ne se voient pas et ne se synchronisent pas.
 
 ## Appariement et synchronisation
 
-Il faut maintenant faire en sorte que nos serveurs se voient et se parlent. Pour ça, il faut savoir comment les contacter.
+Il faut maintenant faire en sorte que nos serveurs se voient et se parlent. Pour cela, il faut savoir comment les contacter.
 
 #### Ajoutez dans les fichiers de configuration une liste des autres pairs avec le port de connexion.
 
@@ -48,17 +48,17 @@ Nous verrons comment résoudre ces difficultés plus tard.
 
 ## CLI
 
-Pour continuer, on va avoir besoin de faire des tests et d'envoyer des commandes `set` et `get`. En utilisant ce que vous venez d'apprendre, transformer le client Command Line Interface (CLI) de la forme :
+Pour continuer, on va avoir besoin de faire des tests et d'envoyer des commandes `set` et `get`. En utilisant ce que vous venez d'apprendre, copiez et transformez le client en Command Line Interface (CLI) de la forme :
 
     node cli.js <configFile> <command> <paramètres>...
 
 Par exemple, pour mettre une valeur :
 
-    node cli.js <configFile> set MonChamp 42
+    node cli.js configuration1.json set MonChamp 42
 
 Et pour la récupérer :
 
-    node cli.js <configFile> get MonChamp
+    node cli.js configuration1.json get MonChamp
 
 ## Jouer à trois ou plus
 
@@ -70,7 +70,7 @@ Dans bitcoin et dans un système distribué plus généralement, on peut ajouter
 
 #### Que se passe-t'il maintenant si vous ajoutez un champs au serveur 1 ? Quel est la réponse des serveur 2 et 3 à votre `get` ?
 
-Quand un nouveau serveur s'ajoute au système, il doit recevoir les mise à jours. Plusieurs solutions :
+Quand un nouveau serveur s'ajoute au système, il doit recevoir les mises à jour. Plusieurs solutions :
 
 * Le serveur demande régulièrement la liste de `keys` mais ça peut rapidement devenir long et le taux de rafraichissement est dépendent de la fréquence des demandes.
 * Soit il demande à être informer des mises à jours, par exemple avec une commande `addListener` et l'adresse de contact.
@@ -78,22 +78,22 @@ Quand un nouveau serveur s'ajoute au système, il doit recevoir les mise à jour
 
 J'aime bien la dernière, elle est simple. Socket.io dispose de la possibilité de faire un broadcast à toutes les sockets connectés : https://socket.io/docs/#Broadcasting-messages
 
-#### Éditez la commande `set` pour qu'elle broadcast l'événement à toutes les personnes connectées.
+#### Éditez la commande `set` pour qu'elle broadcast l'événement à toutes les entités connectées.
 
 #### Est-ce qu'il se passe quelque-chose de bizarre dans vos tests ?
 
 Selon l'implémentation, il peut se former :
 
-* soit une boucle infinie où le message `set` est propagé indéfiniment entre les machines
-* soit une machine est informé plusieurs fois de `set` et affiche une erreur mais se qui met fin à la propagation.
+* soit une boucle infinie où le message `set` est propagé indéfiniment entre les machines.
+* soit une machine est informé plusieurs fois de `set` et affiche une erreur.
 
-Le premier cas est très gênant, le second peut être réglé par un algorithme de consensus.
+#### Faites quelques tests, observez le comportement et vérifiez que cela fonctionne, quelque-soit le serveur qui reçoit les `set` et les `get`.
 
-#### Faite quelques tests et vérifiez que ça fonctionne quelque-soit le serveur qui reçoit les `set` et les `get`.
+Le cas de la boucle infini est très gênant, il peut rapidement conduire à une saturation du réseau et du CPU de la machine. Le second cas est plus compliqué à régler. On peut tester que la valeur est la même mais que faire si elle est diffèrente ? Dans ce cas, pour que tous les noeuds est la même valeur, il faut mettre en place un algorithme de consensus.
 
 ## Conclusion
 
-Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste.
+Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste mais il ne fonctionne que dans un monde idéal où il n'y a pas de pannes ni de de personnes mal intentionnées.
 
 ## Suite
 
