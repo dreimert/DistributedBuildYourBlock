@@ -58,8 +58,8 @@ J'ai réalisé pour vous un serveur de base de données minimaliste. Pour l'exé
 
 La base de données n'accepte que deux commandes : `get` et `set` :
 
-* get : permet de récupérer la valeur d'un champs. Si le champs n'existe pas, retourne `null`.
-* set : permet d'associer une valeur à un champs. Si le champs existe déjà, il n'est pas modifié et la commande retourne `false`. Sinon, place la valeur et retourne `true`.
+* get : permet de récupérer la valeur d'une clé. Si la clé n'existe pas, retourne `null`.
+* set : permet d'associer une valeur à une clé. Si la clé existe déjà, elle n'est pas modifiée et la commande retourne `false`. Sinon, la valeur est affecté à la clé et la commande retourne `true`.
 
 Pour illustrer le fonctionnement, vous pouvez lancer plusieurs fois le client : `node db-client.js`.
 
@@ -85,7 +85,7 @@ Vous avez survécu ? Cool !
 
 Quel est le rapport entre cette base de données et la blockchain ? La blockchain est une base de données avec les propriétés décrites. On ne peut pas mettre à jours les données ni en supprimer, on ne peut qu'en ajouter et lire le contenu.
 
-Mais la blockchain est une base de données distribuées, se qui n'est pas le cas de la notre qui raisonne en terme de client / serveur. On va essayer de corriger ça !
+Mais la blockchain est une base de données distribuées, ce qui n'est pas le cas de la notre qui raisonne en terme de client / serveur. On va essayer de corriger ça !
 
 ## Suite
 
