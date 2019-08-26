@@ -2,114 +2,163 @@
 
 ## Objectif
 
-Les buts de cette étape sont :
+Le but de cette étape est de mettre en place un algorithme de consensus pour notre base de données.
 
-* Transformer notre base de données client / serveur en une base distribuées.
-* Comprendre les problèmes liés aux systèmes distribués.
+## Consensus
 
-## Confiance et défaillance
+À l'étape précédente, nous avons mis en place un système distribué minimal mais qui fonctionne plus ou moins bien car il n'a pas d'algorithme de consensus. Un algorithme de consensus est un algorithme qui va permettre aux noeuds de se mettre d'accord sur une valeur. Par exemple, si deux valeurs différentes sont proposées pour une même clé, l'algorithme doit permettre d'en choisir une.
 
-Dans l'approche par client / serveur, vous devez avoir confiance dans le serveur :
+Ces désaccords peuvent être dû à :
 
-* Il ne va pas altérer les données : les perdre ou les corrompre.
-* Il va être disponible pour vous répondre : accepter de vous répondre, être actif et ne pas subir une panne.
+* des contraintes du monde physique comme la vitesse de la lumière. L'information ne peut pas se téléporter d'un serveur à l'autre, il y a un délai : la latence.
+* Il peut y avoir des dysfonctionnements : pannes de matériel ou corruptions de données.
+* Il y a des humains qui interagissent avec le système et l'infrastructure, ils peuvent être mal informés, incompétents ou malveillants.
 
-Vous devez avoir confiance dans le faite que l'individu ou l'entité qui opère le serveur respecte ces critères. Mais face à des enjeux économiques ou politique important, il se peut qu'on ne puisse pas faire confiance à une seule entité.
+Il n'y a pas de d'algorithme de consensus ultime. Pour pouvoir mettre en place un algorithme de consensus, il faut mettre en place des contraintes qui auront un coup en temps ou en ressources.
 
-Pour résister aux pannes ou à une forte demande vous pouvez aussi avoir envie de mettre plusieurs serveurs, chacun pouvant absorber une partie de la charge.
+## Outch ! Ça lag...
 
-La solution utilisée par la blockchain est la distribution. Il n'y a pas de serveur central, tout le monde peut se rajouter au réseau et assurer le rôle de serveur. C'est une base de données distribués. Distribuer revient à avoir plusieurs serveurs qui se synchronisent entre eux.
+La latence est partout dès qu'il y a communication. L'information ne peut pas aller plus vite que la lumière sans compter les temps de traitement. Par exemple, à l'heure où j'écris ces lignes, pour l'échange d'un message de ping, il y a 229 millisecondes de latence entre Paris et Tokyo : https://wondernetwork.com/pings. Imaginez maintenant un système distribué de plusieurs milliers de noeuds, le temps que l'information se propage d'un bout à l'autre, il peut se passer plusieurs secondes. Et beaucoup plus si vous voulez transporter une grande qualité d'informations.
 
-#### Essayer de lancer plusieurs fois le serveur. Que ce passe-t'il ? Pourquoi ?
+Maintenant, à quelques millisecondes d'écart, deux noeuds du réseau reçoivent pour la clé `Ville` une valeur différentes :
 
-## Configuration
+* Noeud 1 : Ville / Paris
+* Noeud 2 : Ville / Tokyo
 
-Mettre plusieurs serveurs sur une même machine n'est pas une idée de génie. En production, l'utilité est assez limité mais en test ou en développement, c'est fort utile à moins de disposer de plusieurs machines.
+L'information se propage de proche en proche jusqu'à confrontation. Un partie des noeuds à associé Paris et l'autre Tokyo.
 
-Il faut pouvoir lancer le serveur plusieurs fois avec des configuration différentes. Essayer de lancer les commandes suivantes : `node configuration.js configuration1.json`, `node configuration.js configuration2.json` et `node configuration.js`.
+#### Imaginez des solutions possibles. Notez-les, on pourra s'en servir plus tard.
 
-#### En vous inspirant de `configuration.js` modifiez `db.js` et `db-client.js` pour qu'il prennent un fichier de configuration et que fichier détermine le port utilité.
+## Combattre le temps par le temps
 
-Vous êtes maintenant en mesure de lancer deux serveurs en parallèle mais ils ne se voient pas et ne se synchronisent pas.
+Dans l'idée initiale, on ne peut pas mettre à jour une valeur. Partant de cette idée, il semble cohérent que la valeur la plus vieille soit la bonne. Je vous propose donc l'algorithme de consensus suivant : on garde la valeur la plus vieille.
 
-## Appariement et synchronisation
+On n'a pas l'âge d'une valeur pour le moment. Il va falloir la rajouter dans les données stockées mais aussi dans les données échangées pour pouvoir comparer. On ne stocke plus une simple valeur mais un ensemble de valeurs.
 
-Il faut maintenant faire en sorte que nos serveurs se voient et se parlent. Pour ça, il faut savoir comment les contacter.
+```Javascript
+db[field] = {
+  value: value,
+  timestamp: new Date()
+};
+```
 
-#### Ajoutez dans les fichiers de configuration une liste des autres pairs avec le port de connexion.
+#### Modifiez le serveur pour qu'il stocke pour chaque clé la valeur et l'horodatage de celle-ci.
 
-#### Au lancement du serveur, connectez-vous aux autres pairs.
+#### Modifiez le serveur et le CLI pour qu'ils échangent ces informations.
 
-#### Modifiez la méthode `set` pour qu'elle mette à jour les autres pairs.
+Pour tester, vous pouvez ajouter artificiellement de la latence et associer deux valeurs différentes à deux serveurs. Pour ajouter de la latence, mettez le code de mise à jour des serveurs dans la fonction suivante :
 
-Vous avez réussi ? Réfléchissez maintenant à tous les problèmes qui peuvent arriver. Est-ce que cette solution est viable ? Comment ajouter un pair ? Que ce passe-t'il si un pair plante ? Si deux pairs reçoivent en même temps deux valeurs différentes pour la même clé ?
+```Javascript
+setTimeout(() => {
+  // Le code ici sera exécuté après 10 secondes.
+}, 10000);
+```
 
-Nous verrons comment résoudre ces difficultés plus tard.
+Si votre implémentation est correcte, cette solution fonctionne ; tant qu'il n'y a pas de panne ou d'utilisateurs malveillants.
 
-## CLI
+Si un noeud a un problème réseau et que des messages sont perdus, il ne sera jamais mis à jours, même s'il utilise la commande `keys`, celle-ci ne retourne pas l'horodatage de la valeur. S'il a une valeur, il la gardera.
 
-Pour continuer, on va avoir besoin de faire des tests et d'envoyer des commandes `set` et `get`. En utilisant ce que vous venez d'apprendre, transformer le client Command Line Interface (CLI) de la forme :
+#### Qu'est-ce qui empêche un individu mal intentionné de forger une message `set` avec un *vieux* horodatage ou si l'horloge de la machine est mal réglée ? Que va t'il se passer ?
 
-    node cli.js <configFile> <command> <paramètres>...
+Cet algorithme fonctionne dans un monde parfait, sans panne et personnes mal attentionnées. Essayons de faire plus résistant.
 
-Par exemple, pour mettre une valeur :
+## Résistance aux pannes
 
-    node cli.js <configFile> set MonChamp 42
+Le problème d'une panne réseau est que le noeud ne reçoit pas la mise à jour de la valeur. Une solution est de vérifier régulièrement que l'on a bien la même chose que ses voisins.
 
-Et pour la récupérer :
+Actuellement, la commande `keys` ne retourne que la liste des clés mais pas l'horodatage. Avec celle-ci, on ne peut pas savoir si une clé à changée. Le code suivant permet d'extraire uniquement le champs *timestamp* de chaque clé de la base de données.
 
-    node cli.js <configFile> get MonChamp
+```Javascript
+const extractHorodatage = function(db) {
+  return Object.keys(db).reduce(function(result, key) {
+    result[key] = {
+      timestamp: db[key].timestamp
+    };
+    return result;
+  }, {});
+};
+```
 
-## Jouer à trois ou plus
+#### Écrivez une commande `KeysAndTime` qui retourne la liste des clés avec l'horodatage.
 
-Dans bitcoin et dans un système distribué plus généralement, on peut ajouter un noeud à tout moment.
+Il ne reste plus qu'à appeler régulièrement la commande la commande `KeysAndTime` de ces voisins pour détecter une désynchronisation et la corriger. Quand vous corrigez la valeur, informez vos voisins.
 
-#### Ecrivez un troisième fichier de configuration et lancer le serveur sans modifier les deux autres. Que se passe-t'il ?
+```Javascript
+setInterval(() => {
+  // Le code ici sera exécuté toutes les 10 secondes.
 
-#### Modifier le serveur pour qu'au lancement, il fasse une requête `keys` à un des autres serveur et récupère toutes les valeurs qu'il n'a pas.
+}, 10000); // 10000 millisecondes = 10 secondes
+```
 
-#### Que se passe-t'il maintenant si vous ajoutez un champs au serveur 1 ? Quel est la réponse des serveur 2 et 3 à votre `get` ?
+#### Mettez en place la mécanique de détection et de correction.
 
-Quand un nouveau serveur s'ajoute au système, il doit recevoir les mise à jours. Plusieurs solutions :
+## C'est toujours un problème de temps
 
-* Le serveur demande régulièrement la liste de `keys` mais ça peut rapidement devenir long et le taux de rafraichissement est dépendent de la fréquence des demandes.
-* Soit il demande à être informer des mises à jours, par exemple avec une commande `addListener` et l'adresse de contact.
-* Soit les serveurs informent tout leurs contacts dès qu'il y a un événement.
+Dans la vie, je suis plutôt optimiste mais en informatique si ça peut mal se passer, ça se passera mal. Et puis, j'ai besoin de ce ressort scénaristique de fou pour vous amener là où je veux : La solution précédente fonctionne ? Vous êtes sûr ?
 
-J'aime bien la dernière, elle est simple. Socket.io dispose de la possibilité de faire un broadcast à toutes les sockets connectés : https://socket.io/docs/#Broadcasting-messages
+#### Que ce passe-t'il si pour un même timestamp, il y a deux valeurs différentes ?
 
-#### Éditez la commande `set` pour qu'elle broadcast l'événement à toutes les personnes connectées.
+Mais on n'a pas envie d'envoyer la valeur à chaque synchronisation. Imaginez si c'est un fichier de plusieurs centaines de Mo ! À la place, on va utiliser l'empreinte de la valeur qui est produite par une fonction de hachage.
 
-#### Est-ce qu'il se passe quelque-chose de bizarre dans vos tests ?
+## Prenons un peu de *hash*
 
-Selon l'implémentation, il peut se former :
+Une fonction de hachage est une fonction qui prend en entrée un ensemble de données et retourne une empreinte, aussi appelée *hash*. L'empreinte respecte deux principes : Elle est unique pour un ensemble de données d'entrée, et une empreinte donnée ne permet pas de remonter à l'ensemble initial. On parle de non-collision et de non calculabilité de la pré-image. Cette empreinte est de taille fixe quelque-soit l'entrée. Une fonction couramment utilisé est SHA. Voici quelques exemples d'empreinte :
 
-* soit une boucle infinie où le message `set` est propagé indéfiniment entre les machines
-* soit une machine est informé plusieurs fois de `set` et affiche une erreur mais se qui met fin à la propagation.
+```Bash
+> echo "Blockchain" | shasum
+# efcf8baf5959ad1ebc7f4950425ef1c2eae9cbd9  -
 
-Le premier cas est très gênant, le second peut être réglé par un algorithme de consensus.
+> echo "Block" | shasum
+# d1a6b1157e37bdaad78bec4c3240f0d6c576ad21  -
 
-#### Faite quelques tests et vérifiez que ça fonctionne quelque-soit le serveur qui reçoit les `set` et les `get`.
+> echo "Vous commencez à voir le principe ?" | shasum
+# 25abec7ced7642b886c1bffbc710cc3439f23ab7  -
+```
+
+Une propriété intéressante est qu'une petite modification dans l'entrée change totalement l'empreinte :
+
+```Bash
+> echo "Blockchain" | shasum
+# efcf8baf5959ad1ebc7f4950425ef1c2eae9cbd9  -
+
+> echo "blockchain" | shasum
+# ea5f179324c233b002fa8ac4201fa216001515e5  -
+```
+
+Les fonctions de hachage sont couramment utilisées pour vérifier que des données n'ont pas été corrompu lors d'un téléchargement par exemple. Le code suivant permet de produire une empreinte en Javascrip.
+
+```Javascript
+const crypto = require('crypto');
+
+// Retourne l'empreinte de data.
+const getHash = function getHash(data) {
+  return crypto.createHash('sha256').update(data, 'utf8').digest('hex');
+}
+```
+
+## Spoiler : cette fois, c'est la bonne ... avant l'étape suivante.
+
+#### Ajoutez un champs `hash` dans votre base de données.
+
+#### Modifiez `set` pour calculer l'empreinte de la valeur.
+
+#### Éditez la commande `KeysAndTime` pour ajouter le hash.
+
+#### Modifiez votre algorithme de synchronisation pour vérifier le hash.
+
+Vous êtes maintenant résistant à la panne. Enfin, pas à l'instant T mais c'est déjà pas mal !
 
 ## Conclusion
 
-Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste.
+Nous avons mis en place un algorithme de consensus qui résiste aux problèmes de latence et de pannes réseaux. Pour résister, nous avons ajouter des données et mis en place des échanges d'informations supplémentaires, ce qui représente un coût.
+
+Nous n'avons pas traité le troisième cas de désaccords dù à un utilisateur potentiellement malveillants. Nous traiteront se problème à l'étape suivante.
 
 ## Suite
 
-Aller à l'étape 3 : `git checkout etape-3`.
+Aller à l'étape 4 : `git checkout etape-4`.
 
 Pour continuer à lire le sujet :
 
 * soit vous lisez le fichier `README.md` sur votre machine.
-* soit sur GitHub, au-dessus de la liste des fichiers, vous pouvez cliquer sur `Branch: master` et sélectionner `etape-3`.
-
-## Pour aller plus loin
-
-Pour continuer cette étape, vous pouvez identifier les serveurs par leur ip/port et discuter avec vos camarades pour étendre le système entre plusieurs machines.
-
-Vous pouvez mettre en place des backups sur disque de la base de données.
-
-Implémenter une commande `addPeer` qui permet via le CLI d'ajouter l'identifiant d'un serveur à un autre.
-
-Implémentez une commande `getPeers` qui permet d'avoir la liste des pairs d'un serveur et pouvoir se connecter à eux.
+* soit sur GitHub, au-dessus de la liste des fichiers, vous pouvez cliquer sur `Branch: master` et sélectionner `etape-4`.
