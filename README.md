@@ -40,6 +40,17 @@ Il faut maintenant faire en sorte que nos serveurs se voient et se parlent. Pour
 
 #### Au lancement du serveur, connectez-vous aux autres pairs.
 
+```Javascript
+// Pour produire un nouveau tableau à partir d'un tableau
+const monTableauInitial = ['a', 'b', 'c'];
+const nouveauTableau = monTableauInitial.map((element, index) => {
+    // mon traitement
+    // ...
+    return index * index;
+});
+console.log(nouveauTableau); // [0, 1, 4]
+```
+
 #### Modifiez la méthode `set` pour qu'elle mette à jour les autres pairs.
 
 Vous avez réussi ? Réfléchissez maintenant à tous les problèmes qui peuvent arriver. Est-ce que cette solution est viable ? Comment ajouter un pair ? Que ce passe-t'il si un pair plante ? Si deux pairs reçoivent en même temps deux valeurs différentes pour la même clé ?
