@@ -42,6 +42,7 @@ Vérifier que node s'exécute bien :
 ```Bash
 git clone https://github.com/dreimert/DistributedBuildYourBlock.git
 cd DistributedBuildYourBlock
+npm install
 ```
 
 ## Objectif
