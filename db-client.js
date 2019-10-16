@@ -11,11 +11,11 @@ socket.on('connect', () => {
 
   let acc;
 
-  socket.emit('get', 'test', (value) => {
+  socket.volatile.emit('get', 'test', (value) => {
     console.log(`get callback: ${value}`);
     acc = value || 0;
 
-    socket.emit('set', 'test', acc + 1, (value) => {
+    socket.volatile.emit('set', 'test', acc + 1, (value) => {
       console.log(`set callback: ${value}`);
       socket.close();
     });
