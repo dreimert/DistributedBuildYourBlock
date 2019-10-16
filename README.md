@@ -89,7 +89,7 @@ Quand un nouveau serveur s'ajoute au système, il doit recevoir les mises à jou
 
 J'aime bien la dernière, elle est simple. Socket.io dispose de la possibilité de faire un broadcast à toutes les sockets connectés : https://socket.io/docs/#Broadcasting-messages
 
-#### Éditez la commande `set` pour qu'elle broadcast l'événement à toutes les entités connectées.
+#### Éditez la commande `set` pour qu'en plus de ce qu'elle fait déjà, elle broadcast l'événement à toutes les entités connectées.
 
 #### Est-ce qu'il se passe quelque-chose de bizarre dans vos tests ?
 
