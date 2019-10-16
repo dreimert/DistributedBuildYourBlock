@@ -104,7 +104,7 @@ Le cas de la boucle infini est très gênant, il peut rapidement conduire à une
 
 ## Conclusion
 
-Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste mais il ne fonctionne que dans un monde idéal où il n'y a pas de pannes ni de de personnes mal intentionnées.
+Nous avons un système qui marche plus ou moins, dans lequel n'importe quel noeud peut se connecter et reconstruire la base de données. C'est un système distribué minimaliste mais il ne fonctionne que dans un monde idéal où il n'y a pas de pannes ni de personnes mal intentionnées.
 
 ## Suite
 
