@@ -96,16 +96,16 @@ Résumons, il faut coder :
 
 * une structure qui ressemble à ça :
 
-     Enregistrement 0             Enregistrement 1        Enregistrement 2
-    +-----------------------+    +-------------------+    +-------------------+
-    |                       |    |                   |    |                   |
-    | index: 0              |    | index: 1          |    | index: 0          |
-    | id: <hash0>           +<-+ | id: <hash1>       +<-+ | id: <hash2>       |
-    | previous: null        |  +-+ previous: <hash0> |  +-+ previous: <hash1> |
-    | key: Enseignant       |    | key: Cours        |    | key: Etape        |
-    | value: Damien Reimert |    | value: SYD        |    | value: 4          |
-    |                       |    |                   |    |                   |
-    +-----------------------+    +-------------------+    +-------------------+
+       Enregistrement 0             Enregistrement 1        Enregistrement 2
+      +-----------------------+    +-------------------+    +-------------------+
+      |                       |    |                   |    |                   |
+      | index: 0              |    | index: 1          |    | index: 0          |
+      | id: <hash0>           +<-+ | id: <hash1>       +<-+ | id: <hash2>       |
+      | previous: null        |  +-+ previous: <hash0> |  +-+ previous: <hash1> |
+      | key: Enseignant       |    | key: Cours        |    | key: Etape        |
+      | value: Damien Reimert |    | value: SYD        |    | value: 4          |
+      |                       |    |                   |    |                   |
+      +-----------------------+    +-------------------+    +-------------------+
 
 * l'identifiant d'un enregistrement est le hachage de l'ensemble des éléments d'un enregistrement.
 * l'algorithme de consensus est la chaîne la plus longue.
