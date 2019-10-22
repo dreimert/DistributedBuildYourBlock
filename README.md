@@ -62,7 +62,7 @@ Ha ! Et ajoute l'index de l'enregistrement dans la chaine. On pourrait le calcul
      Enregistrement 0             Enregistrement 1        Enregistrement 2
     +-----------------------+    +-------------------+    +-------------------+
     |                       |    |                   |    |                   |
-    | index: 0              |    | index: 1          |    | index: 0          |
+    | index: 0              |    | index: 1          |    | index: 2          |
     | id: <hash0>           +<-+ | id: <hash1>       +<-+ | id: <hash2>       |
     | previous: null        |  +-+ previous: <hash0> |  +-+ previous: <hash1> |
     | key: Enseignant       |    | key: Cours        |    | key: Etape        |
@@ -99,7 +99,7 @@ Résumons, il faut coder :
        Enregistrement 0             Enregistrement 1        Enregistrement 2
       +-----------------------+    +-------------------+    +-------------------+
       |                       |    |                   |    |                   |
-      | index: 0              |    | index: 1          |    | index: 0          |
+      | index: 0              |    | index: 1          |    | index: 2          |
       | id: <hash0>           +<-+ | id: <hash1>       +<-+ | id: <hash2>       |
       | previous: null        |  +-+ previous: <hash0> |  +-+ previous: <hash1> |
       | key: Enseignant       |    | key: Cours        |    | key: Etape        |
