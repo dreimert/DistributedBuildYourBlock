@@ -85,11 +85,11 @@ Quand un nouveau serveur s'ajoute au système, il doit recevoir les mises à jou
 
 * Le serveur demande régulièrement la liste de `keys` mais ça peut rapidement devenir long et le taux de rafraichissement est dépendent de la fréquence des demandes.
 * Soit il demande à être informer des mises à jours, par exemple avec une commande `addListener` et l'adresse de contact.
-* Soit les serveurs informent tout leurs contacts dès qu'il y a un événement.
+* Soit les serveurs informent tout leurs contacts dès qu'il y a un événement, on fait ce qu'on appel un *broadcast*.
 
 J'aime bien la dernière, elle est simple.
 
-#### Éditez la commande `set` pour qu'en plus de ce qu'elle fait déjà, elle broadcast l'événement à toutes les entités connectées.
+#### Éditez la commande `set` pour qu'en plus de ce qu'elle fait déjà, elle broadcast l'événement à toutes les entités connectées ou plus simplement, modifier `io.on("connect")` pour qu'il ajoute les sockets dans la liste des sockets à mettre à jour.
 
 #### Est-ce qu'il se passe quelque-chose de bizarre dans vos tests ?
 
