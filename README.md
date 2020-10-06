@@ -18,7 +18,11 @@ Je pars du principe que vous savez coder en Javascript et utiliser git et github
   * http://www.fil.univ-lille1.fr/~routier/enseignement/licence/tw1/spoc/chap10-evenements-partie1.html (Vidéo / cours de Jean-Christophe Routier)
 * Git : http://rogerdudler.github.io/git-guide/index.fr.html
 
-## Installation de node
+## Installation classique de node
+
+Vous êtes sur votre machine perso Covid oblige ? Tout se passe là : https://nodejs.org/
+
+## Installation de node si vous êtes sur les postes de l'INSA
 
 Télécharger les binaires et les décompresser :
 
